@@ -12,10 +12,11 @@ npm install vuex-heman
 
 **2)**
 
+```javascript
 import vuexHeman from "./install_dir/index.js";
 //or
 import {getters, mutations, actions} from "./install_dir/index.js";
-
+```
 
 ## Overview
 
