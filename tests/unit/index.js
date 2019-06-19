@@ -6,6 +6,9 @@ suite("index.js");
 test("expected exports provided", ()=>{
 	assert.ok("default" in index);
 	assert.ok("vuexHeman" in index);
+	assert.ok("getters" in index);
+	assert.ok("mutations" in index);
+	assert.ok("actions" in index);
 	
 	const heman = index.vuexHeman;
 	

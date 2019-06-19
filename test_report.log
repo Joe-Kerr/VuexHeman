@@ -45,6 +45,6 @@
     √ setArrayElById sets all valid props before it throws
 
 
-  32 passing (27ms)
+  32 passing (29ms)
 
  MOCHA  Tests completed successfully
