@@ -1,5 +1,7 @@
 const assert = require("assert");
+const sinon = require("sinon");
 const {getArrayElWIdxByIdFactory} = require("../../src/getters.js");
+const {helper} = require("../../src/common.js");
 
 suite("getters.js");
 
@@ -15,14 +17,19 @@ test("getArrayElWIdxByIdFactory sets name and index prop of state", ()=>{
 	assert.deepEqual(rightParams(state)(1), {id:1});
 });
 
-test("getArrayElWIdxByIdFactory throws if names of container or index not objects", ()=>{
-	const state = {elements: [{id:1, a:2}], elIndex: {1:0}};
-	
-	const wrongContainer = getArrayElWIdxByIdFactory({container: "bollocks", index: "elIndex"});
-	const wrongIndex = getArrayElWIdxByIdFactory({container: "elements", index: "bollocks"});
-	
-	assert.throws(()=>{ wrongIndex(state, {id:1, a:3}) }, {message: /Name of index/});
-	assert.throws(()=>{ wrongContainer(state, {id:1, a:3}) }, {message: /Name of container/});
+test("getArrayElWIdxByIdFactory calls verification helper", ()=>{
+	sinon.spy(helper, "verifyIndexAndContainer");
+
+	const state = {custEls: [{id:1}], custIdx: {1:0}};
+	const rightParams = getArrayElWIdxByIdFactory({container: "custEls", index: "custIdx"});
+	rightParams(state)(1), {id:1};
+
+	assert.equal(helper.verifyIndexAndContainer.callCount, 1);
+	assert.equal(helper.verifyIndexAndContainer.lastCall.args[0], state);
+	assert.equal(helper.verifyIndexAndContainer.lastCall.args[1], "custIdx");
+	assert.equal(helper.verifyIndexAndContainer.lastCall.args[2], "custEls");
+
+	helper.verifyIndexAndContainer.restore();
 });
 
 

@@ -1,3 +1,5 @@
+const {helper} = require("./common.js");
+
 export const setPropVal = function setPropVal(state, data) {	
 	if(typeof data === "undefined" || !("prop" in data) || !("val" in data)) {
 		throw new Error("Missing property on data parameter: provide 'prop' and 'val'.");
@@ -58,16 +60,8 @@ export const setArrayElPropsByIdFactory = function setArrayElPropsByIdFactory(se
 	const container = settings.container || "container";
 	const index = settings.index || "index";
 	
-	return function generatedSetArrayElPropsById(state, data) {	
-		
-		if(typeof state[index] !== "object") {
-			throw new Error("Name of index does not point to an object in state: "+index);
-		} 
-		
-		if(typeof state[container] !== "object") {
-			throw new Error("Name of container does not point to an object in state: "+container);
-		} 		
-		
+	return function generatedSetArrayElPropsById(state, data) {			
+		helper.verifyIndexAndContainer(state, index, container);	
 		setArrayElPropsById(state[container], state[index], data);
 	}	
 }

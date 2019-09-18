@@ -1,7 +1,21 @@
 const assert = require("assert");
+const sinon = require("sinon");
 const {setPropVal, setProps, setArrayElPropsByIdFactory} = require("../../src/mutations.js");
+const {helper} = require("../../src/common.js");
 
 suite("mutations.js");
+
+before(()=>{
+    sinon.spy(helper, "verifyIndexAndContainer");
+});
+
+after(()=>{
+    helper.verifyIndexAndContainer.restore();
+});
+
+afterEach(()=>{
+    helper.verifyIndexAndContainer.resetHistory();
+});
 
 const setArrayElById = setArrayElPropsByIdFactory();
 
@@ -53,11 +67,15 @@ test("setArrayElPropsByIdFactory sets name and index prop of state", ()=>{
 	assert.equal(state.custEls[0].a, 123);	
 });
 
-test("setArrayElPropsByIdFactory throws if name of container or index not objects", ()=>{
-	const state = {elements: [{id:1, a:2}], elIndex: {1:0}};
+test("setArrayElPropsByIdFactory calls verification helper", ()=>{
+	const state = {custEls: [{id:1, a:456}], custIdx: {1:0}};
+	const rightParams = setArrayElPropsByIdFactory({container: "custEls", index: "custIdx"});
+	rightParams(state, {id:1, a: 123});	
 	
-	assert.throws(()=>{ setArrayElPropsByIdFactory({container: "bollocks", index: "elIndex"})(state) }, {message: /Name of container/});
-	assert.throws(()=>{ setArrayElPropsByIdFactory({container: "elements", index: "bollocks"})(state) }, {message: /Name of index/});
+	assert.equal(helper.verifyIndexAndContainer.callCount, 1);
+	assert.equal(helper.verifyIndexAndContainer.lastCall.args[0], state);
+	assert.equal(helper.verifyIndexAndContainer.lastCall.args[1], "custIdx");
+	assert.equal(helper.verifyIndexAndContainer.lastCall.args[2], "custEls");
 });
 
 test("setArrayElById sets prop/val pairs on element in container by id", ()=>{
