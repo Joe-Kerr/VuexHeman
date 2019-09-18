@@ -54,3 +54,19 @@ export const setArrayElPropsByIdFactory = function setArrayElPropsByIdFactory(se
 		setArrayElPropsById(state[container], state[index], data);
 	}	
 }
+
+export const addArrayElementFactory = function addArrayElementFactory(settings={}) {
+	const container = settings.container || "container";
+    const index = settings.index || "index";
+
+    return function generatedAddArrayElement(state, data) {
+        helper.verifyIndexAndContainer(state, index, container);	
+		
+		if(!("id" in data)) {
+			throw new Error("Failed to add element because it has no id: "+JSON.stringify(data));
+		}
+
+		const newIdx = state[container].push(data) - 1;
+        state[index][data.id] = newIdx;
+    }
+}

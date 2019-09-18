@@ -1,6 +1,6 @@
 const assert = require("assert");
 const sinon = require("sinon");
-const {setPropVal, setProps, setArrayElPropsByIdFactory} = require("../../src/mutations.js");
+const {setPropVal, setProps, setArrayElPropsByIdFactory, addArrayElementFactory} = require("../../src/mutations.js");
 const {helper} = require("../../src/common.js");
 
 suite("mutations.js");
@@ -108,4 +108,37 @@ test("setArrayElById sets all valid props before it throws", ()=>{
 	const state = {container: [{id:1, propE: 123}], index: {1:0}};	
 	assert.throws(()=>{ setArrayElById(state, {id: 1, bollocks: 456, propE: 789}); });
 	assert.equal(state.container[0].propE, 789);
+});
+
+
+test("addArrayElementFactory returns a function", ()=>{
+	assert.equal(typeof addArrayElementFactory(), "function");
+});
+
+test("addArrayElement adds an element to the state's array container", ()=>{
+	const state = {custEls: [{id:2}], custIdx: {2:0}};
+	const mutation = addArrayElementFactory({container: "custEls", index: "custIdx"});
+	const newEl = {id: 123};
+
+	mutation(state, newEl);
+	assert.equal(state.custEls[1], newEl);
+	assert.deepEqual(state.custIdx, {2:0, 123:1});
+});
+
+test("addArrayElement calls verification helper", ()=>{
+	const state = {custEls: [], custIdx: {}};
+	const mutation = addArrayElementFactory({container: "custEls", index: "custIdx"});
+
+	mutation(state, {id: 123});
+	assert.equal(helper.verifyIndexAndContainer.callCount, 1);
+	assert.equal(helper.verifyIndexAndContainer.lastCall.args[0], state);
+	assert.equal(helper.verifyIndexAndContainer.lastCall.args[1], "custIdx");
+	assert.equal(helper.verifyIndexAndContainer.lastCall.args[2], "custEls");
+});
+
+test("addArrayElement throws if element does not have id property", ()=>{
+	const state = {custEls: [], custIdx: {}};
+	const mutation = addArrayElementFactory({container: "custEls", index: "custIdx"});
+
+	assert.throws(()=>{ mutation(state, {noId: 123}); }, {message: /has no id/});
 });
