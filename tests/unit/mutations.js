@@ -179,7 +179,7 @@ test("removeArrayElement calls verification helper", ()=>{
 	assert.equal(helper.verifyIndexAndContainer.lastCall.args[2], "container");	
 });
 
-test("removeArrayElement throws if trying to delete ", ()=>{
+test("removeArrayElement throws if trying to delete non-existing id", ()=>{
 	const state = {container: [{id:1}], index: {1:0}};
 	const mutation = removeArrayElementByIdFactory();	
 	
