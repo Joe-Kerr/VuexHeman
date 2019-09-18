@@ -22,5 +22,6 @@
   "scripts": {
     "dev:test:unit": "vue-cli-service test:unit --ui qunit --recursive tests/unit/**/*.js",
     "dev:build": "vue-cli-service build --target lib --name vuexHeman --entry ./src/index.js --dest ./dist"
-  }
+  },
+  "sideEffects": false
 }
