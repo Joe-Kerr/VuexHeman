@@ -42,18 +42,7 @@ function setArrayElPropsById(container, index, props) {
 	const err = [];
 	delete props.id;
 	
-	for(const p in props) {
-		if(p in el)  {
-			el[p] = props[p];
-		}
-		else {
-			err.push(p);
-		}
-	}
-	
-	if(err.length > 0) {
-		throw new Error("Tried to set at least one non-existing property: "+err.toString(","));
-	}
+	setProps(el, props);
 }
 
 export const setArrayElPropsByIdFactory = function setArrayElPropsByIdFactory(settings={}) {
