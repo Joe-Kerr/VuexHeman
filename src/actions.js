@@ -1,10 +1,10 @@
-function passThruAction(command, store, data) {store.commit(command, data);}
+function passThruAction(command, store, data, options) {store.commit(command, data, options);}
 
 export const passThruActionsFactory = function passThruActionsFactory(names) {
 	
 	if(typeof names === "string") {
-		return function generatedPassThruAction(store, data) {
-			passThruAction(names, store, data);
+		return function generatedPassThruAction(store, data, options) {
+			passThruAction(names, store, data, options);
 		}
 	}
 	
@@ -14,8 +14,8 @@ export const passThruActionsFactory = function passThruActionsFactory(names) {
 			if(typeof name !== "string") {
 				throw new Error("Expected element of array to be of type string. Got: "+typeof name);
 			}
-			obj[name] = function generatedPassThruAction(store, data) {
-				passThruAction(name, store, data);
+			obj[name] = function generatedPassThruAction(store, data, options) {
+				passThruAction(name, store, data, options);
 			}			
 		});
 		return obj;
@@ -25,8 +25,8 @@ export const passThruActionsFactory = function passThruActionsFactory(names) {
 		for(const name in names) {
 			const methodName = name;
 			const commandName = names[name];			
-			names[methodName] = function generatedPassThruAction(store, data) {
-				passThruAction(commandName, store, data);
+			names[methodName] = function generatedPassThruAction(store, data, options) {
+				passThruAction(commandName, store, data, options);
 			}
 		}	
 		return names;

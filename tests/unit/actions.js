@@ -4,6 +4,7 @@ const {passThruActionsFactory} = require("../../src/actions.js");
 
 const commit = new sinon.fake();
 const data = 1;
+const options = 2;
 
 suite("actions.js");
 
@@ -15,9 +16,10 @@ test("passThruActionsFactory returns a single function with the command name pro
 	const generatedAction = passThruActionsFactory("someCommand");
 	assert.equal(typeof generatedAction, "function");
 	
-	generatedAction({commit}, data);
+	generatedAction({commit}, data, options);
 	assert.equal(commit.lastCall.args[0], "someCommand");
 	assert.equal(commit.lastCall.args[1], data);
+	assert.equal(commit.lastCall.args[2], options);
 });
 
 test("passThruActionsFactory returns an object of functions with same command and method names", ()=>{
@@ -27,15 +29,18 @@ test("passThruActionsFactory returns an object of functions with same command an
 	assert.ok("two" in generatedAction);
 	assert.ok("three" in generatedAction);
 	
-	generatedAction.one({commit}, data);
-	generatedAction.two({commit}, data);
-	generatedAction.three({commit}, data);
+	generatedAction.one({commit}, data, options);
+	generatedAction.two({commit}, data, options);
+	generatedAction.three({commit}, data, options);
 	assert.equal(commit.firstCall.args[0], "one");	
 	assert.equal(commit.firstCall.args[1], data);
+	assert.equal(commit.firstCall.args[2], options);
 	assert.equal(commit.secondCall.args[0], "two");	
 	assert.equal(commit.secondCall.args[1], data);
+	assert.equal(commit.secondCall.args[2], options);
 	assert.equal(commit.lastCall.args[0], "three");
 	assert.equal(commit.lastCall.args[1], data);	
+	assert.equal(commit.lastCall.args[2], options);	
 });
 
 test("passThruActionsFactory returns an object of functions with different command and method names", ()=>{
@@ -45,15 +50,18 @@ test("passThruActionsFactory returns an object of functions with different comma
 	assert.ok("prop2" in generatedAction);
 	assert.ok("prop3" in generatedAction);
 	
-	generatedAction.prop1({commit}, data);
-	generatedAction.prop2({commit}, data);
-	generatedAction.prop3({commit}, data);
+	generatedAction.prop1({commit}, data, options);
+	generatedAction.prop2({commit}, data, options);
+	generatedAction.prop3({commit}, data, options);
 	assert.equal(commit.firstCall.args[0], "cmd1");	
 	assert.equal(commit.firstCall.args[1], data);	
+	assert.equal(commit.firstCall.args[2], options);	
 	assert.equal(commit.secondCall.args[0], "cmd2");
 	assert.equal(commit.secondCall.args[1], data);		
+	assert.equal(commit.secondCall.args[2], options);		
 	assert.equal(commit.lastCall.args[0], "cmd3");	
 	assert.equal(commit.lastCall.args[1], data);		
+	assert.equal(commit.lastCall.args[2], options);		
 });
 
 test("passThruActionsFactory throws if parameter not string, array or object", ()=>{
