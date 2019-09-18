@@ -70,3 +70,26 @@ export const addArrayElementFactory = function addArrayElementFactory(settings={
         state[index][data.id] = newIdx;
     }
 }
+
+export const removeArrayElementByIdFactory = function removeArrayElementByIdFactory(settings={}) {
+	const container = settings.container || "container";
+    const index = settings.index || "index";
+    
+    return function generatedRemoveArrayElementById(state, id) {
+        helper.verifyIndexAndContainer(state, index, container);
+		
+		const theContainer = state[container];
+		const i = state[index][id];
+
+        if(theContainer[i] === undefined) {
+            throw new Error("Delete failed. Tried to remove id from undefined index: "+i);
+        }
+
+		theContainer.splice(i, 1);
+		delete state[index][id];
+
+		for(let r=i, rr=theContainer.length; r<rr; r++) {
+			state[index][theContainer[r].id] = r;
+		}
+    }
+}

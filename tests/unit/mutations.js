@@ -1,6 +1,6 @@
 const assert = require("assert");
 const sinon = require("sinon");
-const {setPropVal, setProps, setArrayElPropsByIdFactory, addArrayElementFactory} = require("../../src/mutations.js");
+const {setPropVal, setProps, setArrayElPropsByIdFactory, addArrayElementFactory, removeArrayElementByIdFactory} = require("../../src/mutations.js");
 const {helper} = require("../../src/common.js");
 
 suite("mutations.js");
@@ -141,4 +141,47 @@ test("addArrayElement throws if element does not have id property", ()=>{
 	const mutation = addArrayElementFactory({container: "custEls", index: "custIdx"});
 
 	assert.throws(()=>{ mutation(state, {noId: 123}); }, {message: /has no id/});
+});
+
+
+test("removeArrayElementByIdFactory returns a function", ()=>{
+	assert.equal(typeof removeArrayElementByIdFactory(), "function");
+});
+
+test("removeArrayElement removes an element from the state's array container", ()=>{
+	const state = {custEls: [{id:2}], custIdx: {2:0}};
+	const mutation = removeArrayElementByIdFactory({container: "custEls", index: "custIdx"});	
+
+	mutation(state, 2);
+	assert.equal(state.custEls.length, 0);
+	assert.deepEqual(state.custIdx, {});
+});
+
+test("removeArrayElement rebuilds index", ()=>{
+	const state = {
+		container: [{id:2}, {id:1}, {id:3}, {id: 0}, {id: 8}],
+		index: {2:0, 1:1, 3:2, 0:3, 8:4}
+	};
+	const mutation = removeArrayElementByIdFactory();	
+	
+	mutation(state, 3);
+	assert.deepEqual(state.index, {2:0, 1:1, 0:2, 8:3});
+});
+
+test("removeArrayElement calls verification helper", ()=>{
+	const state = {container: [{id:1}], index: {1:0}};
+	const mutation = removeArrayElementByIdFactory();	
+	
+	mutation(state, 1);	
+	assert.equal(helper.verifyIndexAndContainer.callCount, 1);
+	assert.equal(helper.verifyIndexAndContainer.lastCall.args[0], state);
+	assert.equal(helper.verifyIndexAndContainer.lastCall.args[1], "index");
+	assert.equal(helper.verifyIndexAndContainer.lastCall.args[2], "container");	
+});
+
+test("removeArrayElement throws if trying to delete ", ()=>{
+	const state = {container: [{id:1}], index: {1:0}};
+	const mutation = removeArrayElementByIdFactory();	
+	
+	assert.throws(()=>{ mutation(state, 2);	 }, {message: /id from undefined index/});		
 });
