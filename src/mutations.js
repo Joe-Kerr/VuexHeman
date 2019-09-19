@@ -74,9 +74,10 @@ export const removeArrayElementByIdFactory = function removeArrayElementByIdFact
 	const container = settings.container || "container";
     const index = settings.index || "index";
     
-    return function generatedRemoveArrayElementById(state, id) {
+    return function generatedRemoveArrayElementById(state, data) {
         helper.verifyIndexAndContainer(state, index, container);
 		
+		const id = data.id;
 		const theContainer = state[container];
 		const i = state[index][id];
 
