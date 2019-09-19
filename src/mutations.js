@@ -39,7 +39,6 @@ function setArrayElPropsById(container, index, props) {
 	}
 
 	const el = container[idx];
-	const err = [];
 	delete props.id;
 	
 	setProps(el, props);
