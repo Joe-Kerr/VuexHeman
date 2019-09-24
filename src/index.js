@@ -22,6 +22,10 @@ export const actions = _actions;
 
 export const crudContainer = _crudContainer;
 
+export const {getArrayElWIdxByIdFactory} = _getters;
+export const {setPropVal, setProps, setArrayElPropsByIdFactory, addArrayElementFactory, removeArrayElementByIdFactory} = _mutations;
+export const {passThruActionsFactory} = actions;
+
 export const vuexHeman = {
 	getters, 
 	mutations,
