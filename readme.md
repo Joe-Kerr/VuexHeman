@@ -20,5 +20,5 @@ import {getters, mutations, actions} from "./install_dir/index.js";
 
 ## API docs
 
-[Documentation](https://joe-kerr.github.io/vuex-heman/)
+[Documentation](https://joe-kerr.github.io/VuexHeman/)
 

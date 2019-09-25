@@ -1,6 +1,6 @@
 {
   "name": "vuex-heman",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Vuex helper methods",
   "main": "./src/index.js",
   "module": "./src/index.js",
