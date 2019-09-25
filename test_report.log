@@ -9,24 +9,34 @@
     √ passThruActionsFactory throws if parameter not string, array or object
     √ passThruActionsFactory throws if element of array not of type string
 
+  common.js
+    √ helper.verifyIndexAndContainer throws if index is not an object in state
+    √ helper.verifyIndexAndContainer throws if container is not an array in state
+
+  store.crudContainerFactory.js
+    √ crudContainerFactory returns a Vuex store object
+    √ crudContainerFactory uses property names provided by settings parameter
+    √ crudContainerFactory uses namespaced setting
+    √ crudContainerFactory uses expected getter function
+    √ crudContainerFactory uses expected setter function
+    √ crudContainerFactory uses expected adder function
+    √ crudContainerFactory uses expected deleter function
+    √ crudContainerFactory uses extend setting
+    √ crudContainerFactory prioritises extend properties
+    √ mutations.incrementId increases nextId by 1
+    √ actions.adder calls adder and increment mutations
+
   getters.js
     √ getArrayElWIdxByIdFactory returns a function
     √ getArrayElWIdxByIdFactory sets name and index prop of state
-    √ getArrayElWIdxByIdFactory throws if names of container or index not objects
+    √ getArrayElWIdxByIdFactory calls verification helper
     √ getArrayElWIdxById returns another function
     √ getArrayElWIdxById returns element from container by id
     √ getArrayElWIdxById returns null or predefined value if element not found
 
   index.js
-    √ expected exports provided
-
-  Integration tests on Vuex instance
-    √ Set init with set1 action
-    √ Set init with set2 action
-    √ Set init with set action
-    √ Set prop 'a' of id 1 to 44
-    √ Get element with id 1
-    √ Generated actions do not interfere with promises
+    √ expected categorised exports provided
+    √ expected individual exports provided
 
   mutations.js
     √ setPropVal sets 'val' on state by 'prop'
@@ -37,14 +47,23 @@
     √ setProps sets all valid properties before it throws for invalid ones
     √ setArrayElPropsByIdFactory returns a function
     √ setArrayElPropsByIdFactory sets name and index prop of state
-    √ setArrayElPropsByIdFactory throws if name of container or index not objects
+    √ setArrayElPropsByIdFactory calls verification helper
     √ setArrayElById sets prop/val pairs on element in container by id
     √ setArrayElById throws if id is missing on data
     √ setArrayElById throws if id not found in index
     √ setArrayElById throws if a prop does not exist on element
     √ setArrayElById sets all valid props before it throws
+    √ addArrayElementFactory returns a function
+    √ addArrayElement adds an element to the state's array container
+    √ addArrayElement calls verification helper
+    √ addArrayElement throws if element does not have id property
+    √ removeArrayElementByIdFactory returns a function
+    √ removeArrayElement removes an element from the state's array container
+    √ removeArrayElement rebuilds index
+    √ removeArrayElement calls verification helper
+    √ removeArrayElement throws if trying to delete non-existing id
 
 
-  32 passing (29ms)
+  49 passing (132ms)
 
  MOCHA  Tests completed successfully
