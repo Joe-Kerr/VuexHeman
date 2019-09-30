@@ -14,6 +14,9 @@
     √ helper.verifyIndexAndContainer throws if container is not an array in state
 
   store.crudContainerFactory.js
+    √ CRUD containers are independent from each other
+
+  store.crudContainerFactory.js
     √ crudContainerFactory returns a Vuex store object
     √ crudContainerFactory uses property names provided by settings parameter
     √ crudContainerFactory uses namespaced setting
@@ -21,8 +24,11 @@
     √ crudContainerFactory uses expected setter function
     √ crudContainerFactory uses expected adder function
     √ crudContainerFactory uses expected deleter function
+    √ crudContainerFactory uses expected resetter function
     √ crudContainerFactory uses extend setting
     √ crudContainerFactory prioritises extend properties
+    √ crudContainerFactory generates unique nextId state property
+    √ crudContainerFactory generates unique incrementId mutation
     √ mutations.incrementId increases nextId by 1
     √ actions.adder calls adder and increment mutations
 
@@ -62,8 +68,14 @@
     √ removeArrayElement rebuilds index
     √ removeArrayElement calls verification helper
     √ removeArrayElement throws if trying to delete non-existing id
+    √ resetArrayFactory returns a function
+    √ resetArray replaces container with elements provided
+    √ resetArray empties container if no elements provided
+    √ resetArray does not preserve container references if set
+    √ resetArray rebuilds index
+    √ resetArray calls verification helper
 
 
-  49 passing (132ms)
+  59 passing (54ms)
 
  MOCHA  Tests completed successfully

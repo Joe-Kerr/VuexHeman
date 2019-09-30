@@ -176,6 +176,7 @@ __webpack_require__.d(mutations_namespaceObject, "setProps", function() { return
 __webpack_require__.d(mutations_namespaceObject, "setArrayElPropsByIdFactory", function() { return setArrayElPropsByIdFactory; });
 __webpack_require__.d(mutations_namespaceObject, "addArrayElementFactory", function() { return addArrayElementFactory; });
 __webpack_require__.d(mutations_namespaceObject, "removeArrayElementByIdFactory", function() { return removeArrayElementByIdFactory; });
+__webpack_require__.d(mutations_namespaceObject, "resetArrayFactory", function() { return resetArrayFactory; });
 var actions_namespaceObject = {};
 __webpack_require__.r(actions_namespaceObject);
 __webpack_require__.d(actions_namespaceObject, "passThruActionsFactory", function() { return passThruActionsFactory; });
@@ -239,6 +240,14 @@ var getArrayElWIdxByIdFactory = function getArrayElWIdxByIdFactory() {
   };
 };
 // CONCATENATED MODULE: ./projects/common/vuexHeman/src/mutations.js
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
+
+function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
+
 var mutations_require = __webpack_require__("89b0"),
     mutations_helper = mutations_require.helper; /// The mutation sets a state property.
 /// @function setPropVal
@@ -398,6 +407,51 @@ var removeArrayElementByIdFactory = function removeArrayElementByIdFactory() {
     }
   };
 };
+
+function resetArrayFast(state, containerName, elements) {
+  state[containerName] = elements;
+}
+
+function resetArrayPreserving(container, elements) {
+  container.splice(0, container.length);
+  container.push.apply(container, _toConsumableArray(elements));
+} /// Factory function that can be adapted to your Vuex state and that returns a mutation function. The mutation empties or replaces the container array. 
+/// Assumes that you have on your state an array container and an index object holding id/array index pairs.
+/// Assumes that you do not use the index as reactive property.
+/// @function resetArrayFactory
+/// @param {object} settings - Configuration.
+/// @param {string} [settings.container="container"] - The name of the container.
+/// @param {string} [settings.index="index"] - The name of the index.
+/// @param {bool} [settings.preserveReference=true] - Should the array be overridden (faster) or spliced (slower) to preserve references? Beware: overriding breaks reactivity.
+/// @returns {function} - Returns a Vuex mutation function.
+/// @example <caption>Using the factory function</caption>
+/// { state: {nameOfContainer: [{id: 2, name: "element"}], nameOfIndex: {2:0}},
+///    mutations: {
+///    reset: resetArrayFactory({container: "nameOfContainer", index: "nameOfIndex"}),
+/// }}
+/// @example <caption>Using the mutation</caption>
+/// store.commit("reset", {elements: [{id: 3, name: "replacement"}]); //replace
+/// store.commit("reset"); //empty
+
+
+var resetArrayFactory = function resetArrayFactory() {
+  var settings = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  var container = settings.container || "container";
+  var index = settings.index || "index";
+  var preserveReference = "preserveReference" in settings ? settings.preserveReference : true;
+  return function generatedResetArray(state) {
+    var data = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
+    mutations_helper.verifyIndexAndContainer(state, index, container);
+    var theContainer = state[container];
+    var elements = data.elements || [];
+    preserveReference ? resetArrayPreserving(theContainer, elements) : resetArrayFast(state, container, elements);
+    state[index] = {};
+
+    for (var r = 0, rr = theContainer.length; r < rr; r++) {
+      state[index][theContainer[r].id] = r;
+    }
+  };
+};
 // CONCATENATED MODULE: ./projects/common/vuexHeman/src/actions.js
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
@@ -469,7 +523,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 
 
- /// The factory returns a store module preset. The preset contains a container array intended to hold elements as well as associated CRUD functions.
+
+var id = 1; /// The factory returns a store module preset. The preset contains a container array intended to hold elements as well as associated CRUD functions.
 /// @function crudContainerFactory
 /// @param {object} settings - Configuration.
 /// @param {string} [settings.container="container"] - The name of the container.
@@ -478,6 +533,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 /// @param {string} [settings.getterName="getById"] - The name of the action/mutation that gets an element.
 /// @param {string} [settings.setterName="set"] - The name of the action/mutation that sets a property of an element.
 /// @param {string} [settings.deleterName="delete"] - The name of the action/mutation that deletes an element.
+/// @param {string} [settings.resetterName="reset"] - The name of the action/mutation that resets the element container.
 /// @param {bool} [settings.namespaced=true] - Vuex "namespaced" property.
 /// @param {object} settings.extend - A Vuex store object (state, getters, mutations and/or actions) that extends the CRUD container. 
 /// @returns {object} - A Vuex store object. 
@@ -492,6 +548,10 @@ function crudContainerFactory() {
   var getterName = settings.getterName || "getById";
   var setterName = settings.setterName || "set";
   var deleterName = settings.deleterName || "delete";
+  var resetterName = settings.resetterName || "reset";
+  var incrementIdName = "incrementId" + id;
+  var nextIdName = "nextId" + id;
+  id++;
   var extend = settings.extend || {};
   var actionsMap = {};
   actionsMap[setterName] = setterName;
@@ -505,7 +565,7 @@ function crudContainerFactory() {
   };
   store.state[container] = [];
   store.state[index] = {};
-  store.state.nextId = 1;
+  store.state[nextIdName] = 1;
   store.getters[getterName] = getArrayElWIdxByIdFactory({
     container: container,
     index: index
@@ -522,17 +582,21 @@ function crudContainerFactory() {
     container: container,
     index: index
   });
+  store.mutations[resetterName] = resetArrayFactory({
+    container: container,
+    index: index
+  });
 
-  store.mutations.incrementId = function incrementId(state) {
-    state.nextId++;
+  store.mutations[incrementIdName] = function incrementId(state) {
+    state[nextIdName]++;
   };
 
   store.actions = _objectSpread({}, passThruActionsFactory(actionsMap));
 
   store.actions[adderName] = function generatedAdderAction(store, element) {
-    element.id = store.state.nextId;
+    element.id = store.state[nextIdName];
     store.commit(adderName, element);
-    store.commit("incrementId"); //return store.getters.getElementById(element.id);
+    store.commit(incrementIdName); //return store.getters.getElementById(element.id);
 
     return element;
   };
@@ -580,7 +644,8 @@ var src_setPropVal = setPropVal,
     src_setProps = setProps,
     src_setArrayElPropsByIdFactory = setArrayElPropsByIdFactory,
     src_addArrayElementFactory = addArrayElementFactory,
-    src_removeArrayElementByIdFactory = removeArrayElementByIdFactory;
+    src_removeArrayElementByIdFactory = removeArrayElementByIdFactory,
+    src_resetArrayFactory = resetArrayFactory;
 
 var src_passThruActionsFactory = actions.passThruActionsFactory;
 
@@ -602,6 +667,7 @@ var vuexHeman = {
 /* concated harmony reexport setArrayElPropsByIdFactory */__webpack_require__.d(__webpack_exports__, "setArrayElPropsByIdFactory", function() { return src_setArrayElPropsByIdFactory; });
 /* concated harmony reexport addArrayElementFactory */__webpack_require__.d(__webpack_exports__, "addArrayElementFactory", function() { return src_addArrayElementFactory; });
 /* concated harmony reexport removeArrayElementByIdFactory */__webpack_require__.d(__webpack_exports__, "removeArrayElementByIdFactory", function() { return src_removeArrayElementByIdFactory; });
+/* concated harmony reexport resetArrayFactory */__webpack_require__.d(__webpack_exports__, "resetArrayFactory", function() { return src_resetArrayFactory; });
 /* concated harmony reexport passThruActionsFactory */__webpack_require__.d(__webpack_exports__, "passThruActionsFactory", function() { return src_passThruActionsFactory; });
 /* concated harmony reexport vuexHeman */__webpack_require__.d(__webpack_exports__, "vuexHeman", function() { return vuexHeman; });
 
