@@ -157,3 +157,49 @@ export const removeArrayElementByIdFactory = function removeArrayElementByIdFact
 		}
     }
 }
+
+function resetArrayFast(state, containerName, elements) {
+	state[containerName] = elements;
+}
+
+function resetArrayPreserving(container, elements) {
+	container.splice(0, container.length);
+	container.push(...elements);
+}
+
+/// Factory function that can be adapted to your Vuex state and that returns a mutation function. The mutation empties or replaces the container array. 
+/// Assumes that you have on your state an array container and an index object holding id/array index pairs.
+/// Assumes that you do not use the index as reactive property.
+/// @function resetArrayFactory
+/// @param {object} settings - Configuration.
+/// @param {string} [settings.container="container"] - The name of the container.
+/// @param {string} [settings.index="index"] - The name of the index.
+/// @param {bool} [settings.preserveReference=true] - Should the array be overridden (faster) or spliced (slower) to preserve references? Beware: overriding breaks reactivity.
+/// @returns {function} - Returns a Vuex mutation function.
+/// @example <caption>Using the factory function</caption>
+/// { state: {nameOfContainer: [{id: 2, name: "element"}], nameOfIndex: {2:0}},
+///    mutations: {
+///    reset: resetArrayFactory({container: "nameOfContainer", index: "nameOfIndex"}),
+/// }}
+/// @example <caption>Using the mutation</caption>
+/// store.commit("reset", {elements: [{id: 3, name: "replacement"}]); //replace
+/// store.commit("reset"); //empty
+export const resetArrayFactory = function resetArrayFactory(settings={}) {
+	const container = settings.container || "container";
+	const index = settings.index || "index";
+	const preserveReference = ("preserveReference" in settings) ? settings.preserveReference : true;
+    
+    return function generatedResetArray(state, data=[]) {
+		helper.verifyIndexAndContainer(state, index, container);
+
+		const theContainer = state[container];
+		const elements = data.elements || [];
+
+		(preserveReference) ? resetArrayPreserving(theContainer, elements) : resetArrayFast(state, container, elements);
+
+		state[index] = {};
+		for(let r=0, rr=theContainer.length; r<rr; r++) {
+			state[index][theContainer[r].id] = r;
+		}		
+	}
+}

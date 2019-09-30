@@ -1,6 +1,6 @@
 const assert = require("assert");
 const sinon = require("sinon");
-const {setPropVal, setProps, setArrayElPropsByIdFactory, addArrayElementFactory, removeArrayElementByIdFactory} = require("../../src/mutations.js");
+const {setPropVal, setProps, setArrayElPropsByIdFactory, addArrayElementFactory, removeArrayElementByIdFactory, resetArrayFactory} = require("../../src/mutations.js");
 const {helper} = require("../../src/common.js");
 
 suite("mutations.js");
@@ -185,4 +185,65 @@ test("removeArrayElement throws if trying to delete non-existing id", ()=>{
 	
 	assert.throws(()=>{ mutation(state, {id:2}); }, {message: /id from undefined index/});		
 	assert.throws(()=>{ mutation(state, {noIdAtAll:2}); }, {message: /id from undefined index/});		
+});
+
+
+test("resetArrayFactory returns a function", ()=>{
+	assert.equal(typeof resetArrayFactory(), "function");
+});
+
+test("resetArray replaces container with elements provided", ()=>{
+	const state = {container: [{id:1}], index: {1:0}};
+	const mutation = resetArrayFactory();
+	const replace = {id:9};	
+	mutation(state, {elements: [replace]});
+
+	assert.equal(state.container.length, 1);
+	assert.equal(state.container[0], replace);
+	assert.deepEqual(state.index, {9:0});
+});
+
+test("resetArray empties container if no elements provided", ()=>{
+	const state = {container: [{id:1}], index: {1:0}};
+	const mutation = resetArrayFactory();
+	mutation(state);
+
+	assert.equal(state.container.length, 0);
+	assert.deepEqual(state.index, {});	
+});
+
+test("resetArray does not preserve container references if set", ()=>{
+	const state = {container: [{id:1}], index: {1:0}};
+	const replace = {id:9};	
+	const preserving = resetArrayFactory({preserveReference: true});
+	const nonPreserving = resetArrayFactory({preserveReference: false});
+	let reference;
+
+	reference = state.container;
+	preserving(state, {elements: [replace]});
+	assert.equal(state.container, reference);
+
+	reference = state.container;
+	nonPreserving(state, {elements: [replace]});
+	assert.notEqual(state.container, reference);
+});
+
+test("resetArray rebuilds index", ()=>{
+	const state = {container: [], index: {1:0, 2:1, 3:2, 4:3}};
+	const mutation = resetArrayFactory();
+	const replace = [{id:9}, {id:8}, {id:7}, {id:6}];	
+	mutation(state, {elements: replace});
+
+	assert.deepEqual(state.index, {9:0, 8:1, 7:2, 6:3});	
+});
+
+test("resetArray calls verification helper", ()=>{
+	const state = {container: [{id:1}], index: {1:0}};
+	const mutation = resetArrayFactory();	
+	
+	mutation(state, {id:1});	
+	assert.equal(helper.verifyIndexAndContainer.callCount, 1);
+	assert.equal(helper.verifyIndexAndContainer.lastCall.args[0], state);
+	assert.equal(helper.verifyIndexAndContainer.lastCall.args[1], "index");
+	assert.equal(helper.verifyIndexAndContainer.lastCall.args[2], "container");	
 });
