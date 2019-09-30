@@ -6,6 +6,12 @@ suite("store.crudContainerFactory.js");
 
 let backup;
 
+function getUniqueProp(parent, prop) {
+    const results = Object.keys(parent).filter(_prop=>_prop.startsWith(prop));
+    assert.equal(results.length, 1, "Test error: Expected exactly 1 unique prop.");
+    return results[0];
+}
+
 before(()=>{
     backup = console.warn;
     console.warn = ()=>{};
@@ -32,6 +38,7 @@ test("crudContainerFactory uses property names provided by settings parameter", 
         setterName: "testSetter",
         adderName: "testAdder",
         deleterName: "testDeleter",
+        resetterName: "testResetter"
     });
 
     assert.ok("testContainer" in store.state);
@@ -42,6 +49,7 @@ test("crudContainerFactory uses property names provided by settings parameter", 
     assert.ok("testSetter" in store.mutations);
     assert.ok("testAdder" in store.mutations);
     assert.ok("testDeleter" in store.mutations);
+    assert.ok("testResetter" in store.mutations);
     
     assert.ok("testSetter" in store.actions);
     assert.ok("testAdder" in store.actions);
@@ -74,6 +82,11 @@ test("crudContainerFactory uses expected adder function", ()=>{
 test("crudContainerFactory uses expected deleter function", ()=>{
     const store = sample();
     assert.equal(store.mutations.delete.name, "generatedRemoveArrayElementById");       
+});
+
+test("crudContainerFactory uses expected resetter function", ()=>{
+    const store = sample();
+    assert.equal(store.mutations.reset.name, "generatedResetArray");       
 });
 
 test("crudContainerFactory uses extend setting", ()=>{
@@ -112,23 +125,47 @@ test("crudContainerFactory prioritises extend properties", ()=>{
     assert.equal(store.mutations.c3.name, "c3n");
 });
 
+test("crudContainerFactory generates unique nextId state property", ()=>{
+    const storeA = sample();
+    const storeB = sample();
+
+    const nextIdA = getUniqueProp(storeA.state, "nextId");
+    const nextIdB = getUniqueProp(storeB.state, "nextId");
+
+    assert.notEqual(nextIdA, nextIdB);
+});
+
+test("crudContainerFactory generates unique incrementId mutation", ()=>{
+    const storeA = sample();
+    const storeB = sample();
+
+    const nextIdA = getUniqueProp(storeA.mutations, "incrementId");
+    const nextIdB = getUniqueProp(storeB.mutations, "incrementId");
+
+    assert.notEqual(nextIdA, nextIdB);    
+});
+
 test("mutations.incrementId increases nextId by 1", ()=>{
     const store = sample();
-    const state = {nextId: 1};
-
-    store.mutations.incrementId(state);
-    assert.equal(state.nextId, 2);
+    const mutationName = getUniqueProp(store.mutations, "incrementId");
+    const idName = getUniqueProp(store.state, "nextId");    
+    
+    const state = {};
+    state[idName] = 1;
+    store.mutations[mutationName](state);
+    assert.equal(state[idName], 2);
 });
 
 test("actions.adder calls adder and increment mutations", ()=>{
     const store = sample();
     const commit = new sinon.fake();
     const data = {id:1};
+    const incrementName = getUniqueProp(store.mutations, "incrementId");
     
     store.actions.add({commit, state: {}}, data);
 
     assert.equal(commit.callCount, 2);
     assert.equal(commit.firstCall.args[0], "add");
     assert.equal(commit.firstCall.args[1], data);
-    assert.equal(commit.lastCall.args[0], "incrementId");
+    assert.equal(commit.lastCall.args[0], incrementName);
 });
