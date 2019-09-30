@@ -712,6 +712,45 @@
 
         <tr>
             
+                <td class="name"><code>resetterName</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    "reset"
+                
+                </td>
+            
+
+            <td class="description last">The name of the action/mutation that resets the element container.</td>
+        </tr>
+
+    
+
+        <tr>
+            
                 <td class="name"><code>namespaced</code></td>
             
 
@@ -827,7 +866,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="store.crudContainerFactory.js.html">store.crudContainerFactory.js</a>, <a href="store.crudContainerFactory.js.html#line5">line 5</a>
+        <a href="store.crudContainerFactory.js.html">store.crudContainerFactory.js</a>, <a href="store.crudContainerFactory.js.html#line7">line 7</a>
     </li></ul></dd>
     
 
@@ -1685,6 +1724,330 @@
     
 
     
+    <h4 class="name" id="resetArrayFactory"><span class="type-signature"></span>resetArrayFactory<span class="signature">(settings)</span><span class="type-signature"> &rarr; {function}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Factory function that can be adapted to your Vuex state and that returns a mutation function. The mutation empties or replaces the container array. 
+ Assumes that you have on your state an array container and an index object holding id/array index pairs.
+ Assumes that you do not use the index as reactive property.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>settings</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Configuration.
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>container</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    "container"
+                
+                </td>
+            
+
+            <td class="description last">The name of the container.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>index</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    "index"
+                
+                </td>
+            
+
+            <td class="description last">The name of the index.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>preserveReference</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">bool</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    true
+                
+                </td>
+            
+
+            <td class="description last">Should the array be overridden (faster) or spliced (slower) to preserve references? Beware: overriding breaks reactivity.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="mutations.js.html">mutations.js</a>, <a href="mutations.js.html#line180">line 180</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    - Returns a Vuex mutation function.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">function</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+    <h5>Examples</h5>
+    
+        <p class="code-caption">Using the factory function</p>
+    
+    <pre class="prettyprint"><code> { state: {nameOfContainer: [{id: 2, name: "element"}], nameOfIndex: {2:0}},
+    mutations: {
+    reset: resetArrayFactory({container: "nameOfContainer", index: "nameOfIndex"}),
+ }}
+ </code></pre>
+
+        <p class="code-caption">Using the mutation</p>
+    
+    <pre class="prettyprint"><code> store.commit("reset", {elements: [{id: 3, name: "replacement"}]); //replace
+ store.commit("reset"); //empty</code></pre>
+
+
+
+        
+            
+
+    
+
+    
     <h4 class="name" id="setArrayElPropsByIdFactory"><span class="type-signature"></span>setArrayElPropsByIdFactory<span class="signature">(settings)</span><span class="type-signature"> &rarr; {function}</span></h4>
     
 
@@ -2209,13 +2572,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#addArrayElementFactory">addArrayElementFactory</a></li><li><a href="global.html#crudContainerFactory">crudContainerFactory</a></li><li><a href="global.html#getArrayElWIdxByIdFactory">getArrayElWIdxByIdFactory</a></li><li><a href="global.html#passThruActionsFactory">passThruActionsFactory</a></li><li><a href="global.html#removeArrayElementByIdFactory">removeArrayElementByIdFactory</a></li><li><a href="global.html#setArrayElPropsByIdFactory">setArrayElPropsByIdFactory</a></li><li><a href="global.html#setProps">setProps</a></li><li><a href="global.html#setPropVal">setPropVal</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#addArrayElementFactory">addArrayElementFactory</a></li><li><a href="global.html#crudContainerFactory">crudContainerFactory</a></li><li><a href="global.html#getArrayElWIdxByIdFactory">getArrayElWIdxByIdFactory</a></li><li><a href="global.html#passThruActionsFactory">passThruActionsFactory</a></li><li><a href="global.html#removeArrayElementByIdFactory">removeArrayElementByIdFactory</a></li><li><a href="global.html#resetArrayFactory">resetArrayFactory</a></li><li><a href="global.html#setArrayElPropsByIdFactory">setArrayElPropsByIdFactory</a></li><li><a href="global.html#setProps">setProps</a></li><li><a href="global.html#setPropVal">setPropVal</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Tue Sep 24 2019 15:25:21 GMT+0200 (GMT+02:00)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Mon Sep 30 2019 13:55:04 GMT+0200 (GMT+02:00)
 </footer>
 
 <script> prettyPrint(); </script>

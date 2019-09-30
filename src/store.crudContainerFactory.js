@@ -5,6 +5,7 @@ import {passThruActionsFactory} from "./actions";
 let id = 1;
 
 /// The factory returns a store module preset. The preset contains a container array intended to hold elements as well as associated CRUD functions.
+/// Notice that keeping the default names of store components for non-namespaced containers will result in duplicate commit/dispatch calls. Make sure to provide unique names to non-namespaced modules.
 /// @function crudContainerFactory
 /// @param {object} settings - Configuration.
 /// @param {string} [settings.container="container"] - The name of the container.
