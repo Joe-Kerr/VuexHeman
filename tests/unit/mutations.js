@@ -1,6 +1,6 @@
 const assert = require("assert");
 const sinon = require("sinon");
-const {setPropVal, setProps, setArrayElPropsByIdFactory, addArrayElementFactory, removeArrayElementByIdFactory, resetArrayFactory} = require("../../src/mutations.js");
+const {setPropVal, setProps, setArrayElPropsByIdFactory, addArrayElementFactory, removeArrayElementByIdFactory, resetArrayFactory, setPropsOnObjectFactory} = require("../../src/mutations.js");
 const {helper} = require("../../src/common.js");
 
 suite("mutations.js");
@@ -52,6 +52,31 @@ test("setProps sets all valid properties before it throws for invalid ones", ()=
 	const state = {a:1, b:2, c:3};	
 	assert.throws(()=>{ setProps(state, {a:10, b:20, c:30, d:4}); }, {message: /non-existing property/});	
 	assert.deepEqual(state, {a:10, b:20, c:30});
+});
+
+
+test("setPropsOnObjectFactory returns a function", ()=>{
+	assert.equal(typeof setPropsOnObjectFactory({object: "dontThrow"}), "function");
+});
+
+test("setPropsOnObjectFactory throws if 'object' setting missing", ()=>{
+	assert.throws(()=>{setPropsOnObjectFactory();}, {message: /setting\.object/});
+});
+
+test("setPropsOnObject throws if object name not on state", ()=>{
+	const state = {testObj: {a:2}};
+	const mutation = setPropsOnObjectFactory({object: "anythingButTestObj"});
+	
+	assert.throws(()=>{mutation(state);}, {message: /object with the name on the state does not exist/});
+});
+
+test("setPropsOnObject calls setProps (inference)", ()=>{
+	const state = {testObj: {a:2, b:3}};
+	const mutation = setPropsOnObjectFactory({object: "testObj"});	
+	const update = {a: 123, b: 456};
+	
+	mutation(state, update);
+	assert.deepEqual(state, {testObj: {a: 123, b: 456}});
 });
 
 

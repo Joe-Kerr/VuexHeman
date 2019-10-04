@@ -173,6 +173,7 @@ var mutations_namespaceObject = {};
 __webpack_require__.r(mutations_namespaceObject);
 __webpack_require__.d(mutations_namespaceObject, "setPropVal", function() { return setPropVal; });
 __webpack_require__.d(mutations_namespaceObject, "setProps", function() { return setProps; });
+__webpack_require__.d(mutations_namespaceObject, "setPropsOnObjectFactory", function() { return setPropsOnObjectFactory; });
 __webpack_require__.d(mutations_namespaceObject, "setArrayElPropsByIdFactory", function() { return setArrayElPropsByIdFactory; });
 __webpack_require__.d(mutations_namespaceObject, "addArrayElementFactory", function() { return addArrayElementFactory; });
 __webpack_require__.d(mutations_namespaceObject, "removeArrayElementByIdFactory", function() { return removeArrayElementByIdFactory; });
@@ -297,6 +298,34 @@ var setProps = function setProps(state, data) {
   if (err.length > 0) {
     throw new Error("Tried to set at least one non-existing property: " + err.join(","));
   }
+}; /// Factory function that can be adapted to your Vuex state and that returns a mutation function. The mutation sets the properties of an object on the state.
+/// @function setPropsOnObjectFactory
+/// @param {object} settings - Configuration.
+/// @param {string} settings.object - The name of the object on the state.
+/// @returns {function} - Returns a Vuex mutation function.
+/// @example <caption>Using the factory function</caption>
+/// { state: {someObject: {propA: 2, propB: 5}},
+///    mutations: {
+///    set: setPropsOnObjectFactory({object: "someObject"}),
+/// }}
+/// @example <caption>Using the mutation</caption>
+/// store.commit("set", {propA: 123, propB: 456});
+
+var setPropsOnObjectFactory = function setPropsOnObjectFactory() {
+  var settings = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  var object = settings.object;
+
+  if (object === undefined) {
+    throw new Error("Missing mandatory settings parameter 'setting.object'");
+  }
+
+  return function generatedSetPropsOnObject(state, data) {
+    if (!(object in state)) {
+      throw new Error("The object with the name on the state does not exist: " + object);
+    }
+
+    setProps(state[object], data);
+  };
 };
 
 function setArrayElPropsById(container, index, props) {
@@ -525,6 +554,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 
 var id = 1; /// The factory returns a store module preset. The preset contains a container array intended to hold elements as well as associated CRUD functions.
+/// Notice that keeping the default names of store components for non-namespaced containers will result in duplicate commit/dispatch calls. Make sure to provide unique names to non-namespaced modules.
 /// @function crudContainerFactory
 /// @param {object} settings - Configuration.
 /// @param {string} [settings.container="container"] - The name of the container.
@@ -643,6 +673,7 @@ var src_getArrayElWIdxByIdFactory = getArrayElWIdxByIdFactory;
 var src_setPropVal = setPropVal,
     src_setProps = setProps,
     src_setArrayElPropsByIdFactory = setArrayElPropsByIdFactory,
+    src_setPropsOnObjectFactory = setPropsOnObjectFactory,
     src_addArrayElementFactory = addArrayElementFactory,
     src_removeArrayElementByIdFactory = removeArrayElementByIdFactory,
     src_resetArrayFactory = resetArrayFactory;
@@ -665,6 +696,7 @@ var vuexHeman = {
 /* concated harmony reexport setPropVal */__webpack_require__.d(__webpack_exports__, "setPropVal", function() { return src_setPropVal; });
 /* concated harmony reexport setProps */__webpack_require__.d(__webpack_exports__, "setProps", function() { return src_setProps; });
 /* concated harmony reexport setArrayElPropsByIdFactory */__webpack_require__.d(__webpack_exports__, "setArrayElPropsByIdFactory", function() { return src_setArrayElPropsByIdFactory; });
+/* concated harmony reexport setPropsOnObjectFactory */__webpack_require__.d(__webpack_exports__, "setPropsOnObjectFactory", function() { return src_setPropsOnObjectFactory; });
 /* concated harmony reexport addArrayElementFactory */__webpack_require__.d(__webpack_exports__, "addArrayElementFactory", function() { return src_addArrayElementFactory; });
 /* concated harmony reexport removeArrayElementByIdFactory */__webpack_require__.d(__webpack_exports__, "removeArrayElementByIdFactory", function() { return src_removeArrayElementByIdFactory; });
 /* concated harmony reexport resetArrayFactory */__webpack_require__.d(__webpack_exports__, "resetArrayFactory", function() { return src_resetArrayFactory; });

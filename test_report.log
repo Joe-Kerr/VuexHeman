@@ -51,6 +51,10 @@
     √ setProps sets valid properties
     √ setProps throws if undefined property
     √ setProps sets all valid properties before it throws for invalid ones
+    √ setPropsOnObjectFactory returns a function
+    √ setPropsOnObjectFactory throws if 'object' setting missing
+    √ setPropsOnObject throws if object name not on state
+    √ setPropsOnObject calls setProps (inference)
     √ setArrayElPropsByIdFactory returns a function
     √ setArrayElPropsByIdFactory sets name and index prop of state
     √ setArrayElPropsByIdFactory calls verification helper
@@ -76,6 +80,6 @@
     √ resetArray calls verification helper
 
 
-  59 passing (54ms)
+  63 passing (57ms)
 
  MOCHA  Tests completed successfully

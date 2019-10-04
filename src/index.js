@@ -23,7 +23,7 @@ export const actions = _actions;
 export const crudContainer = _crudContainer;
 
 export const {getArrayElWIdxByIdFactory} = _getters;
-export const {setPropVal, setProps, setArrayElPropsByIdFactory, addArrayElementFactory, removeArrayElementByIdFactory, resetArrayFactory} = _mutations;
+export const {setPropVal, setProps, setArrayElPropsByIdFactory, setPropsOnObjectFactory, addArrayElementFactory, removeArrayElementByIdFactory, resetArrayFactory} = _mutations;
 export const {passThruActionsFactory} = actions;
 
 export const vuexHeman = {

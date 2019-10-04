@@ -47,6 +47,34 @@ export const setProps = function setProps(state, data) {
 	}	
 }
 
+/// Factory function that can be adapted to your Vuex state and that returns a mutation function. The mutation sets the properties of an object on the state.
+/// @function setPropsOnObjectFactory
+/// @param {object} settings - Configuration.
+/// @param {string} settings.object - The name of the object on the state.
+/// @returns {function} - Returns a Vuex mutation function.
+/// @example <caption>Using the factory function</caption>
+/// { state: {someObject: {propA: 2, propB: 5}},
+///    mutations: {
+///    set: setPropsOnObjectFactory({object: "someObject"}),
+/// }}
+/// @example <caption>Using the mutation</caption>
+/// store.commit("set", {propA: 123, propB: 456});
+export const setPropsOnObjectFactory = function setPropsOnObjectFactory(settings={}) {
+	const object = settings.object;
+	
+	if(object === undefined) {
+		throw new Error("Missing mandatory settings parameter 'setting.object'");
+	}
+	
+	return function generatedSetPropsOnObject(state, data) {
+		if(!(object in state)) {
+			throw new Error("The object with the name on the state does not exist: "+object);
+		}
+		
+		setProps(state[object], data);
+	}
+}
+
 function setArrayElPropsById(container, index, props) {
 	const id = props.id;
 	if(typeof id === "undefined") {
