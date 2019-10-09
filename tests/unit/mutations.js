@@ -54,6 +54,100 @@ test("setProps sets all valid properties before it throws for invalid ones", ()=
 	assert.deepEqual(state, {a:10, b:20, c:30});
 });
 
+test("setProps sets objects as-is by default", ()=>{
+	const state = {a: [1,2], b: {c:4}};	
+	setProps(state, {a: [3,4], b: {d:5}})
+	assert.deepEqual(state, {a: [3,4], b: {d:5}});	
+});
+
+test("setProps sets an object property recursively if parameter set", ()=>{
+	const state = {a: {b: {c: 3}, d:4}};
+	setProps(state, {a: {b: {c: 4}}, objOp: "recur"});
+	assert.deepEqual(state, {a: {b: {c: 4}, d:4}});
+});
+
+test("setProps uses push on array property if parameter set", ()=>{
+	const state = {array: [1]};
+	setProps(state, {array: 2, arrOp: "push"});
+	assert.deepEqual(state, {array: [1,2]});
+});
+
+test("setProps uses unshift on array property if parameter set", ()=>{
+	const state = {array: [1]};
+	setProps(state, {array: 2, arrOp: "unshift"});
+	assert.deepEqual(state, {array: [2,1]});	
+});
+
+test("setProps uses pop on array property if parameter set", ()=>{
+	const state = {array: [1,2]};
+	setProps(state, {array: null, arrOp: "pop"});
+	assert.deepEqual(state, {array: [1]});	
+});
+
+test("setProps uses shift on array property if parameter set", ()=>{
+	const state = {array: [1,2]};
+	setProps(state, {array: null, arrOp: "shift"});
+	assert.deepEqual(state, {array: [2]});	
+});
+
+test("setProps uses insert on array property if parameter set", ()=>{
+	const state = {array: [1]};
+	
+	setProps(state, {array: {value: "two", index: 0}, arrOp: "insert"});
+	assert.deepEqual(state, {array: ["two", 1]});		
+	
+	setProps(state, {array: {value: 3, element: "two"}, arrOp: "insert"});
+	assert.deepEqual(state, {array: [3, "two", 1]});		
+});
+
+test("setProps uses delete on array property if parameter set", ()=>{
+	const state = {array: [1]};
+	
+	setProps(state, {array: 1, arrOp: "delete"});
+	assert.deepEqual(state, {array: []});		
+});
+
+test("setProps throws if inserting when property value is not an object", ()=>{
+	const state = {array: [1]};
+	assert.throws(()=>{ setProps(state, {array: "notAnObject", arrOp: "insert"}); }, {message: /the property value must be an object/});
+});
+
+test("setProps throws if inserting when neither an index or an element is provided on property value", ()=>{
+	const state = {array: [1]};
+	assert.throws(()=>{ setProps(state, {array: {value: 2}, arrOp: "insert"}); }, {message: /index property \(number\) or an element to insert at./});
+});
+
+test("setProps throws if inserting when the element to insert at is not found in the array", ()=>{
+	const state = {array: [1]};
+	assert.throws(()=>{ setProps(state, {array: {value: 2, element: 123}, arrOp: "insert"}); }, {message: /the element property to insert at does not exist/});
+});
+
+test("setProps throws if deleting when the element to delete is not found in the array", ()=>{
+	const state = {array: [1]};
+	assert.throws(()=>{ setProps(state, {array:123, arrOp: "delete"}); }, {message: /the element to delete does not exist/});
+});
+
+test("setProps throws for unknown array operation command", ()=>{
+	const state = {array: []};
+	assert.throws(()=>{ setProps(state, {array:1, arrOp: "bollocks"}); }, {message: /Unknown array operation/});
+});
+
+test("setProps applies object property commands to all objects on data parameter", ()=>{
+	const state = {obj1: {a:2,d:4}, obj2: {b:3,d:4}, arr1: [1], arr2: [2]};
+	
+	setProps(state, {
+		obj1: {a:3},
+		obj2: {b:4},
+		objOp: "recur",
+		
+		arr1: 2,
+		arr2: 3,
+		arrOp: "push"
+	});
+	
+	assert.deepEqual(state, {obj1: {a:3,d:4}, obj2: {b:4,d:4}, arr1: [1,2], arr2: [2,3]});
+});
+
 
 test("setPropsOnObjectFactory returns a function", ()=>{
 	assert.equal(typeof setPropsOnObjectFactory({object: "dontThrow"}), "function");

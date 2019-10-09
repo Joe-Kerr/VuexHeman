@@ -51,6 +51,20 @@
     √ setProps sets valid properties
     √ setProps throws if undefined property
     √ setProps sets all valid properties before it throws for invalid ones
+    √ setProps sets objects as-is by default
+    √ setProps sets an object property recursively if parameter set
+    √ setProps uses push on array property if parameter set
+    √ setProps uses unshift on array property if parameter set
+    √ setProps uses pop on array property if parameter set
+    √ setProps uses shift on array property if parameter set
+    √ setProps uses insert on array property if parameter set
+    √ setProps uses delete on array property if parameter set
+    √ setProps throws if inserting when property value is not an object
+    √ setProps throws if inserting when neither an index or an element is provided on property value
+    √ setProps throws if inserting when the element to insert at is not found in the array
+    √ setProps throws if deleting when the element to delete is not found in the array
+    √ setProps throws for unknown array operation command
+    √ setProps applies object property commands to all objects on data parameter
     √ setPropsOnObjectFactory returns a function
     √ setPropsOnObjectFactory throws if 'object' setting missing
     √ setPropsOnObject throws if object name not on state
@@ -80,6 +94,6 @@
     √ resetArray calls verification helper
 
 
-  63 passing (57ms)
+  77 passing (61ms)
 
  MOCHA  Tests completed successfully

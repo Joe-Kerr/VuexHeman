@@ -22,7 +22,97 @@ export const setPropVal = function setPropVal(state, data) {
 	state[data.prop] = data.val;
 }
 
-/// The mutation sets state properties by key/val pairs on the data parameter.
+/// Private function used by {@link setProps}, {@link setPropsOnObjectFactory}, {@link setArrayElPropsByIdFactory} to handle object (nested) and array property values.
+/// @function setPropsHandleObject
+/// @param {object} state - Vuex state object of mutation.
+/// @param {object} data - Your data passed to the mutation.
+/// @param {string} [data.arrOp=undefined] - The operation that should happen when a property value is an array. Available:<br>
+/// - push: same as array.push<br>
+/// - pop: same as array.pop<br>
+/// - shift: same as array.shift<br>
+/// - unshift: same as array.unshift<br>
+/// - insert: value needs to be an object {value, element|index} where value is the actual value to insert and index or element the location to insert to<br>
+/// - delete:  deletes value of array property<br>
+/// @param {string} [data.objOp=undefined] - The operation that should happen when a property value is an object. Available: "recur" which sets object recursively.
+/// @param {string} propName - Interal helper
+/// @example
+/// { state: {propA: 1, propB: {subPropC: 2, subPropD: 3}, propE: [1,2,3]},
+///   mutations: { set: setProps
+/// }
+/// //...
+/// store.commit("set", {propE: ["a", "b", "c"]} // replaces array of propE
+/// store.commit("set", {propE: "four", arrOp: "push"}) // appends "four" to propE
+/// store.commit("set", {propB: {subPropD: 4}, objOp: "recur"}) // sets subPropD to 4
+/// store.commit("set", {propE: {value: 1.5, element: 2}, arrOp: "insert"}) // inserts 1.5 before 2 in propE array
+function setPropsHandleObject(state, data, propName) {
+	if(state[propName] instanceof Array && "arrOp" in data) {
+		switch(data.arrOp) {
+			case "push": 
+				state[propName].push(data[propName]);
+				break;
+				
+			case "unshift": 
+				state[propName].unshift(data[propName]);			
+				break;
+				
+			case "pop": 
+				state[propName].pop();
+				break;
+				
+			case "shift": 
+				state[propName].shift();
+				break;
+				
+			case "insert":
+				const insertDetails = data[propName];
+				const array = state[propName];
+				
+				if(typeof insertDetails !== "object") {
+					throw new Error("Failed to insert: the property value must be an object with properties value and index or element.");
+				}
+				
+				const {value, index, element} = insertDetails;
+				
+				if(typeof index !== "number" && element === undefined) {
+					throw new Error("Failed to insert: either provide on the property value an index property (number) or an element to insert at.");
+				}
+				
+				const i = (typeof index === "number") ? index : array.indexOf(element);
+				if(i>-1) {
+					array.splice(i, 0, value);
+				}
+				else {
+					throw new Error("Failed to insert: the element property to insert at does not exist in the array.");
+				}
+				break;
+				
+			case "delete":
+				const i2 = state[propName].indexOf(data[propName]);
+				if(i2 > -1) {
+					state[propName].splice(i2, 1);
+				}
+				else {
+					throw new Error("Failed to delete: the element to delete does not exist in the array.");
+				}
+				break;
+
+			
+			default:
+				throw new Error("Unknown array operation provided: "+data.arrOp);
+			break;
+		}
+	}
+	
+	else if(data.objOp === "recur") {
+		setProps(state[propName], data[propName]);
+	}
+	
+	else {
+		state[propName] = data[propName];
+	}
+}
+
+/// The mutation sets state properties by key/val pairs on the data parameter. See {@link setPropsHandleObject} how object/array values can be handled.
 /// @function setProps
 /// @throws Throws for undefined properties - after all valid properties have been set.
 /// @example <caption>Using the factory function</caption>
@@ -35,11 +125,19 @@ export const setPropVal = function setPropVal(state, data) {
 export const setProps = function setProps(state, data) {
 	const err = [];
 	for(const prop in data) {
+		if(prop === "arrOp" || prop === "objOp") {continue};
+		
 		if(!(prop in state)) {
 			err.push(prop);
 			continue;
 		}
-		state[prop] = data[prop];
+		
+		if(typeof state[prop] !== "object") {
+			state[prop] = data[prop];
+		}
+		else {
+			setPropsHandleObject(state, data, prop);
+		}
 	}
 
 	if(err.length > 0) {
@@ -47,7 +145,7 @@ export const setProps = function setProps(state, data) {
 	}	
 }
 
-/// Factory function that can be adapted to your Vuex state and that returns a mutation function. The mutation sets the properties of an object on the state.
+/// Factory function that can be adapted to your Vuex state and that returns a mutation function. The mutation sets the properties of an object on the state. See {@link setPropsHandleObject} how object/array values can be handled.
 /// @function setPropsOnObjectFactory
 /// @param {object} settings - Configuration.
 /// @param {string} settings.object - The name of the object on the state.
@@ -92,7 +190,7 @@ function setArrayElPropsById(container, index, props) {
 	setProps(el, props);
 }
 
-/// Factory function that can be adapted to your Vuex state and that returns a mutation function. The mutation sets the properties of an element within an array to the given values.
+/// Factory function that can be adapted to your Vuex state and that returns a mutation function. The mutation sets the properties of an element within an array to the given values. See {@link setPropsHandleObject} how object/array values can be handled.
 /// Assumes that you have on your state an array container and an index object holding id/array index pairs.
 /// Assumes that the update data provided to the mutation have an id property.
 /// @function setArrayElPropsByIdFactory

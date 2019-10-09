@@ -249,6 +249,8 @@ function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.
 
 function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
 
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
 var mutations_require = __webpack_require__("89b0"),
     mutations_helper = mutations_require.helper; /// The mutation sets a state property.
 /// @function setPropVal
@@ -272,7 +274,74 @@ var setPropVal = function setPropVal(state, data) {
   }
 
   state[data.prop] = data.val;
-}; /// The mutation sets state properties by key/val pairs on the data parameter.
+};
+
+function setPropsHandleObject(state, data, propName) {
+  if (state[propName] instanceof Array && "arrOp" in data) {
+    switch (data.arrOp) {
+      case "push":
+        state[propName].push(data[propName]);
+        break;
+
+      case "unshift":
+        state[propName].unshift(data[propName]);
+        break;
+
+      case "pop":
+        state[propName].pop();
+        break;
+
+      case "shift":
+        state[propName].shift();
+        break;
+
+      case "insert":
+        var insertDetails = data[propName];
+        var array = state[propName];
+
+        if (_typeof(insertDetails) !== "object") {
+          throw new Error("Failed to insert: the property value must be an object with properties value and index or element.");
+        }
+
+        var value = insertDetails.value,
+            index = insertDetails.index,
+            element = insertDetails.element;
+
+        if (typeof index !== "number" && element === undefined) {
+          throw new Error("Failed to insert: either provide on the property value an index property (number) or an element to insert at.");
+        }
+
+        var i = typeof index === "number" ? index : array.indexOf(element);
+
+        if (i > -1) {
+          array.splice(i, 0, value);
+        } else {
+          throw new Error("Failed to insert: the element property to insert at does not exist in the array.");
+        }
+
+        break;
+
+      case "delete":
+        var i2 = state[propName].indexOf(data[propName]);
+
+        if (i2 > -1) {
+          state[propName].splice(i2, 1);
+        } else {
+          throw new Error("Failed to delete: the element to delete does not exist in the array.");
+        }
+
+        break;
+
+      default:
+        throw new Error("Unknown array operation provided: " + data.arrOp);
+        break;
+    }
+  } else if (data.objOp === "recur") {
+    setProps(state[propName], data[propName]);
+  } else {
+    state[propName] = data[propName];
+  }
+} /// The mutation sets state properties by key/val pairs on the data parameter.
 /// @function setProps
 /// @throws Throws for undefined properties - after all valid properties have been set.
 /// @example <caption>Using the factory function</caption>
@@ -283,16 +352,27 @@ var setPropVal = function setPropVal(state, data) {
 /// @example <caption>Using the mutation</caption>
 /// store.commit("set", {propA: 2, propB: 3});
 
+
 var setProps = function setProps(state, data) {
   var err = [];
 
   for (var prop in data) {
+    if (prop === "arrOp" || prop === "objOp") {
+      continue;
+    }
+
+    ;
+
     if (!(prop in state)) {
       err.push(prop);
       continue;
     }
 
-    state[prop] = data[prop];
+    if (_typeof(state[prop]) !== "object") {
+      state[prop] = data[prop];
+    } else {
+      setPropsHandleObject(state, data, prop);
+    }
   }
 
   if (err.length > 0) {
@@ -482,7 +562,7 @@ var resetArrayFactory = function resetArrayFactory() {
   };
 };
 // CONCATENATED MODULE: ./projects/common/vuexHeman/src/actions.js
-function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+function actions_typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { actions_typeof = function _typeof(obj) { return typeof obj; }; } else { actions_typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return actions_typeof(obj); }
 
 /// The factory returns simple 'passthrough' actions that only call mutations.
 /// @function passThruActionsFactory
@@ -516,7 +596,7 @@ var passThruActionsFactory = function passThruActionsFactory(names) {
     var obj = {};
     names.forEach(function (name) {
       if (typeof name !== "string") {
-        throw new Error("Expected element of array to be of type string. Got: " + _typeof(name));
+        throw new Error("Expected element of array to be of type string. Got: " + actions_typeof(name));
       }
 
       obj[name] = function generatedPassThruAction(store, data, options) {
@@ -526,7 +606,7 @@ var passThruActionsFactory = function passThruActionsFactory(names) {
     return obj;
   }
 
-  if (_typeof(names) === "object") {
+  if (actions_typeof(names) === "object") {
     var _loop = function _loop(name) {
       var methodName = name;
       var commandName = names[name];
@@ -543,7 +623,7 @@ var passThruActionsFactory = function passThruActionsFactory(names) {
     return names;
   }
 
-  throw new Error("Expected parameter to be of type string, object or array. Got: " + _typeof(names));
+  throw new Error("Expected parameter to be of type string, object or array. Got: " + actions_typeof(names));
 };
 // CONCATENATED MODULE: ./projects/common/vuexHeman/src/store.crudContainerFactory.js
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
