@@ -53,10 +53,16 @@ export default function crudContainerFactory(settings={}) {
     store.mutations[setterName] = setArrayElPropsByIdFactory({container, index});
     store.mutations[deleterName] = removeArrayElementByIdFactory({container, index});
     store.mutations[resetterName] = resetArrayFactory({container, index});
-    store.mutations[incrementIdName] = function incrementId(state) {state[nextIdName]++;};
+    store.mutations[incrementIdName] = function incrementId(state, data) {
+		if(typeof data !== "undefined" && "baseId" in data) {
+			state[nextIdName] = data.baseId;
+		}
+		state[nextIdName]++;
+	};
 
     store.actions = {...passThruActionsFactory(actionsMap)};
-    store.actions[adderName] = function generatedAdderAction(store, element) {
+    
+	store.actions[adderName] = function generatedAdderAction(store, element) {
         element.id = store.state[nextIdName];
 
         store.commit(adderName, element);
@@ -64,7 +70,26 @@ export default function crudContainerFactory(settings={}) {
 
         //return store.getters.getElementById(element.id);
         return element;
-    } 
+    }
+
+	store.actions[resetterName] = function generatedResetterAction(store, data=[]) {
+		let maxId = 0;
+		
+		if("elements" in data) {
+			data.elements.forEach((el)=>{
+				if(el.id > maxId) {
+					maxId = el.id;
+				}
+			});	
+			
+			if(typeof maxId !== "number" || isNaN(maxId)) {
+				maxId = 0;
+			}
+		}
+
+		store.commit(incrementIdName, {baseId: maxId});
+		store.commit(resetterName, data);
+	}
 
     if("state" in extend) {Object.assign(store.state, extend.state);}
     if("getters" in extend) {Object.assign(store.getters, extend.getters);}

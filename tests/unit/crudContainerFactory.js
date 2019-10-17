@@ -156,6 +156,17 @@ test("mutations.incrementId increases nextId by 1", ()=>{
     assert.equal(state[idName], 2);
 });
 
+test("mutations.incrementId sets optional base id before incrementing", ()=>{
+    const store = sample();
+    const mutationName = getUniqueProp(store.mutations, "incrementId");
+    const idName = getUniqueProp(store.state, "nextId");   	
+	
+    const state = {};
+    state[idName] = 1;	
+    store.mutations[mutationName](state, {baseId: 123});
+    assert.equal(state[idName], 124);	
+});
+
 test("actions.adder calls adder and increment mutations", ()=>{
     const store = sample();
     const commit = new sinon.fake();
@@ -168,4 +179,30 @@ test("actions.adder calls adder and increment mutations", ()=>{
     assert.equal(commit.firstCall.args[0], "add");
     assert.equal(commit.firstCall.args[1], data);
     assert.equal(commit.lastCall.args[0], incrementName);
+});
+
+test("actions.resetter calls incrementId mutation with max id of elements", ()=>{
+    const store = sample();
+    const commit = new sinon.fake();
+    const data = {elements: [{id:5}, {id:1}]};
+    const incrementName = getUniqueProp(store.mutations, "incrementId");
+    
+    store.actions.reset({commit, state: {}}, data);	
+	
+    assert.equal(commit.callCount, 2);
+    assert.equal(commit.firstCall.args[0], incrementName);
+    assert.equal(commit.firstCall.args[1].baseId, 5);
+
+	store.actions.reset({commit, state: {}});
+	assert.equal(commit.thirdCall.args[1].baseId, 0);	
+});
+
+test("actions.resetter calls resetter mutation with data", ()=>{
+    const store = sample();
+    const commit = new sinon.fake();
+	const data = {elements: [{id:5}, {id:1}]};
+    
+    store.actions.reset({commit, state: {}}, data);
+	assert.equal(commit.lastCall.args[0], "reset");
+	assert.equal(commit.lastCall.args[1], data);
 });
