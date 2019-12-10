@@ -38,14 +38,16 @@ test("crudContainerFactory uses property names provided by settings parameter", 
         setterName: "testSetter",
         adderName: "testAdder",
         deleterName: "testDeleter",
-        resetterName: "testResetter"
+        resetterName: "testResetter",
+		getNextIdName: "testGetNextId"
     });
 
     assert.ok("testContainer" in store.state);
     assert.ok("testIndex" in store.state);
     
     assert.ok("testGetter" in store.getters);
-    
+    assert.ok("testGetNextId" in store.getters);
+	
     assert.ok("testSetter" in store.mutations);
     assert.ok("testAdder" in store.mutations);
     assert.ok("testDeleter" in store.mutations);
@@ -67,6 +69,11 @@ test("crudContainerFactory uses namespaced setting", ()=>{
 test("crudContainerFactory uses expected getter function", ()=>{
     const store = sample();
     assert.equal(store.getters.getById.name, "generatedGetArrayElWIdxById");
+});
+
+test("crudContainerFactory uses expected getNextId function", ()=>{
+    const store = sample();
+    assert.equal(store.getters.getNextId.name, "generatedGetNextId");      
 });
 
 test("crudContainerFactory uses expected setter function", ()=>{
@@ -143,6 +150,17 @@ test("crudContainerFactory generates unique incrementId mutation", ()=>{
     const nextIdB = getUniqueProp(storeB.mutations, "incrementId");
 
     assert.notEqual(nextIdA, nextIdB);    
+});
+
+test("getters.getNextId returns next free instance id", ()=>{
+    const store = sample({getNextIdName: "testGetNextId"});
+    const mutationName = getUniqueProp(store.mutations, "incrementId");
+	const idName = getUniqueProp(store.state, "nextId");  
+
+    const state = {};
+    state[idName] = 1;
+    store.mutations[mutationName](state);
+    assert.equal(store.getters.testGetNextId(state), 2);	
 });
 
 test("mutations.incrementId increases nextId by 1", ()=>{

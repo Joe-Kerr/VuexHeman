@@ -265,7 +265,28 @@ var setPropVal = function setPropVal(state, data) {
   }
 
   state[data.prop] = data.val;
-};
+}; /// Private function used by {@link setProps}, {@link setPropsOnObjectFactory}, {@link setArrayElPropsByIdFactory} to handle object (nested) and array property values.
+/// @function setPropsHandleObject
+/// @param {object} state - Vuex state object of mutation.
+/// @param {object} data - Your data passed to the mutation.
+/// @param {string} [data.arrOp=undefined] - The operation that should happen when a property value is an array. Available:<br>
+/// - push: same as array.push<br>
+/// - pop: same as array.pop<br>
+/// - shift: same as array.shift<br>
+/// - unshift: same as array.unshift<br>
+/// - insert: value needs to be an object {value, element|index} where value is the actual value to insert and index or element the location to insert to<br>
+/// - delete:  deletes value of array property<br>
+/// @param {string} [data.objOp=undefined] - The operation that should happen when a property value is an object. Available: "recur" which sets object recursively.
+/// @param {string} propName - Interal helper
+/// @example
+/// { state: {propA: 1, propB: {subPropC: 2, subPropD: 3}, propE: [1,2,3]},
+///   mutations: { set: setProps
+/// }
+/// //...
+/// store.commit("set", {propE: ["a", "b", "c"]} // replaces array of propE
+/// store.commit("set", {propE: "four", arrOp: "push"}) // appends "four" to propE
+/// store.commit("set", {propB: {subPropD: 4}, objOp: "recur"}) // sets subPropD to 4
+/// store.commit("set", {propE: {value: 1.5, element: 2}, arrOp: "insert"}) // inserts 1.5 before 2 in propE array
 
 function setPropsHandleObject(state, data, propName) {
   if (state[propName] instanceof Array && "arrOp" in data) {
@@ -332,7 +353,7 @@ function setPropsHandleObject(state, data, propName) {
   } else {
     state[propName] = data[propName];
   }
-} /// The mutation sets state properties by key/val pairs on the data parameter.
+} /// The mutation sets state properties by key/val pairs on the data parameter. See {@link setPropsHandleObject} how object/array values can be handled.
 /// @function setProps
 /// @throws Throws for undefined properties - after all valid properties have been set.
 /// @example <caption>Using the factory function</caption>
@@ -369,7 +390,7 @@ var setProps = function setProps(state, data) {
   if (err.length > 0) {
     throw new Error("Tried to set at least one non-existing property: " + err.join(","));
   }
-}; /// Factory function that can be adapted to your Vuex state and that returns a mutation function. The mutation sets the properties of an object on the state.
+}; /// Factory function that can be adapted to your Vuex state and that returns a mutation function. The mutation sets the properties of an object on the state. See {@link setPropsHandleObject} how object/array values can be handled.
 /// @function setPropsOnObjectFactory
 /// @param {object} settings - Configuration.
 /// @param {string} settings.object - The name of the object on the state.
@@ -415,7 +436,7 @@ function setArrayElPropsById(container, index, props) {
   var el = container[idx];
   delete props.id;
   setProps(el, props);
-} /// Factory function that can be adapted to your Vuex state and that returns a mutation function. The mutation sets the properties of an element within an array to the given values.
+} /// Factory function that can be adapted to your Vuex state and that returns a mutation function. The mutation sets the properties of an element within an array to the given values. See {@link setPropsHandleObject} how object/array values can be handled.
 /// Assumes that you have on your state an array container and an index object holding id/array index pairs.
 /// Assumes that the update data provided to the mutation have an id property.
 /// @function setArrayElPropsByIdFactory
@@ -617,7 +638,9 @@ var passThruActionsFactory = function passThruActionsFactory(names) {
   throw new Error("Expected parameter to be of type string, object or array. Got: " + actions_typeof(names));
 };
 // CONCATENATED MODULE: ./projects/common/vuexHeman/src/store.crudContainerFactory.js
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -635,6 +658,7 @@ var id = 1; /// The factory returns a store module preset. The preset contains a
 /// @param {string} [settings.setterName="set"] - The name of the action/mutation that sets a property of an element.
 /// @param {string} [settings.deleterName="delete"] - The name of the action/mutation that deletes an element.
 /// @param {string} [settings.resetterName="reset"] - The name of the action/mutation that resets the element container.
+/// @param {string} [settings.getNextIdName="getNextId"] - The name of the getter that returns the next free id.
 /// @param {bool} [settings.namespaced=true] - Vuex "namespaced" property.
 /// @param {object} settings.extend - A Vuex store object (state, getters, mutations and/or actions) that extends the CRUD container. 
 /// @returns {object} - A Vuex store object. 
@@ -650,6 +674,7 @@ function crudContainerFactory() {
   var setterName = settings.setterName || "set";
   var deleterName = settings.deleterName || "delete";
   var resetterName = settings.resetterName || "reset";
+  var getNextIdName = settings.getNextIdName || "getNextId";
   var incrementIdName = "incrementId" + id;
   var nextIdName = "nextId" + id;
   id++;
@@ -671,6 +696,11 @@ function crudContainerFactory() {
     container: container,
     index: index
   });
+
+  store.getters[getNextIdName] = function generatedGetNextId(state) {
+    return state[nextIdName];
+  };
+
   store.mutations[adderName] = addArrayElementFactory({
     container: container,
     index: index
@@ -688,7 +718,11 @@ function crudContainerFactory() {
     index: index
   });
 
-  store.mutations[incrementIdName] = function incrementId(state) {
+  store.mutations[incrementIdName] = function incrementId(state, data) {
+    if (typeof data !== "undefined" && "baseId" in data) {
+      state[nextIdName] = data.baseId;
+    }
+
     state[nextIdName]++;
   };
 
@@ -700,6 +734,28 @@ function crudContainerFactory() {
     store.commit(incrementIdName); //return store.getters.getElementById(element.id);
 
     return element;
+  };
+
+  store.actions[resetterName] = function generatedResetterAction(store) {
+    var data = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
+    var maxId = 0;
+
+    if ("elements" in data) {
+      data.elements.forEach(function (el) {
+        if (el.id > maxId) {
+          maxId = el.id;
+        }
+      });
+
+      if (typeof maxId !== "number" || isNaN(maxId)) {
+        maxId = 0;
+      }
+    }
+
+    store.commit(incrementIdName, {
+      baseId: maxId
+    });
+    store.commit(resetterName, data);
   };
 
   if ("state" in extend) {

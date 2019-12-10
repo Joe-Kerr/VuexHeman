@@ -15,6 +15,7 @@ let id = 1;
 /// @param {string} [settings.setterName="set"] - The name of the action/mutation that sets a property of an element.
 /// @param {string} [settings.deleterName="delete"] - The name of the action/mutation that deletes an element.
 /// @param {string} [settings.resetterName="reset"] - The name of the action/mutation that resets the element container.
+/// @param {string} [settings.getNextIdName="getNextId"] - The name of the getter that returns the next free id.
 /// @param {bool} [settings.namespaced=true] - Vuex "namespaced" property.
 /// @param {object} settings.extend - A Vuex store object (state, getters, mutations and/or actions) that extends the CRUD container. 
 /// @returns {object} - A Vuex store object. 
@@ -31,6 +32,8 @@ export default function crudContainerFactory(settings={}) {
     const deleterName = settings.deleterName || "delete"; 
     const resetterName = settings.resetterName || "reset";
 
+	const getNextIdName = settings.getNextIdName || "getNextId";
+	
     const incrementIdName = "incrementId"+id;
     const nextIdName = "nextId"+id;
     id++;
@@ -48,6 +51,7 @@ export default function crudContainerFactory(settings={}) {
     store.state[nextIdName] = 1;
 
     store.getters[getterName] = getArrayElWIdxByIdFactory({container, index});
+    store.getters[getNextIdName] = function generatedGetNextId(state) {return state[nextIdName];};
 
     store.mutations[adderName] = addArrayElementFactory({container, index});
     store.mutations[setterName] = setArrayElPropsByIdFactory({container, index});

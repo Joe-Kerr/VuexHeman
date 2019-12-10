@@ -1,3 +1,5 @@
+Unit test report 
+
  MOCHA  Testing...
 
 
@@ -15,12 +17,14 @@
 
   store.crudContainerFactory.js
     √ CRUD containers are independent from each other
+    √ CRUD containers use their own id range 
 
   store.crudContainerFactory.js
     √ crudContainerFactory returns a Vuex store object
     √ crudContainerFactory uses property names provided by settings parameter
     √ crudContainerFactory uses namespaced setting
     √ crudContainerFactory uses expected getter function
+    √ crudContainerFactory uses expected getNextId function
     √ crudContainerFactory uses expected setter function
     √ crudContainerFactory uses expected adder function
     √ crudContainerFactory uses expected deleter function
@@ -29,8 +33,12 @@
     √ crudContainerFactory prioritises extend properties
     √ crudContainerFactory generates unique nextId state property
     √ crudContainerFactory generates unique incrementId mutation
+    √ getters.getNextId returns next free instance id
     √ mutations.incrementId increases nextId by 1
+    √ mutations.incrementId sets optional base id before incrementing
     √ actions.adder calls adder and increment mutations
+    √ actions.resetter calls incrementId mutation with max id of elements
+    √ actions.resetter calls resetter mutation with data
 
   getters.js
     √ getArrayElWIdxByIdFactory returns a function
@@ -94,6 +102,6 @@
     √ resetArray calls verification helper
 
 
-  77 passing (61ms)
+  83 passing 
 
  MOCHA  Tests completed successfully
