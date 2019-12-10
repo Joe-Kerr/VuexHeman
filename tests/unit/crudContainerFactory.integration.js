@@ -32,18 +32,26 @@ test("CRUD containers are independent from each other", ()=>{
 		}
 	});
 	
-	const aNextId = getUniqueProp(store.state.a, "nextId");
-	const bNextId = getUniqueProp(store.state.b, "nextId");
-	
 	store.dispatch("addA", {dt: 1});
 	store.dispatch("addA", {dt: 2});
 	store.dispatch("addB", {dt: 3});
 	
 	assert.deepEqual(store.state.a.aContainer, [{id:1, dt:1}, {id:2, dt:2}]);
 	assert.deepEqual(store.state.a.aIndex, {1:0, 2:1});
-	assert.equal(store.state.a[aNextId], 3);
 	
 	assert.deepEqual(store.state.b.bContainer, [{id:1, dt:3}]);
 	assert.deepEqual(store.state.b.bIndex, {1:0});
-	assert.equal(store.state.b[bNextId], 2);
+});
+
+test("CRUD containers use their own id range ", ()=>{
+    const storeA = new Vuex.Store( sample({namespaced: false}) );
+    const storeB = new Vuex.Store( sample({namespaced: false}) );
+    const nextIdA = getUniqueProp(storeA.state, "nextId");
+    const nextIdB = getUniqueProp(storeB.state, "nextId");
+
+	storeA.dispatch("add", {});
+	storeB.dispatch("add", {});
+	
+	assert.equal(storeA.state[nextIdA], 2);
+	assert.equal(storeB.state[nextIdB], 2);
 });
