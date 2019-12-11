@@ -1,7 +1,6 @@
-# VuexHeman - Vuex Helper methods
+# VuexHeman - Vuex Helper methods and necessities
 
 Set of common helper functions for Vuex. They are intended for internal use. Should the need arise please yell at me and I will update the docs. 
-<sub>**Because "VuexHem" sounds too boring.</sub>
 
 ## Install
 
