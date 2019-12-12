@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: actions.visitor.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: actions.visitor.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>function recur(modules, callback, namespace) {
+	for(const moduleName in modules) {		
+		if(moduleName === "storeVisitor") { continue; }
+		
+		const moduleMeta = modules[moduleName];
+		
+		const moduleObject = moduleMeta._rawModule || {};
+		const moduleChildren = moduleMeta._children;
+		//const isDynamic = moduleMeta.runtime;
+
+		/*
+		const readOnlyModules = {
+			namespaced: moduleObject.namespaced 
+		};
+		
+		if("getters" in moduleObject) {
+			readOnlyModules.getters = Object.keys(moduleObject.getters);
+		}	
+		
+		if("mutations" in moduleObject) {
+			readOnlyModules.mutations = Object.keys(moduleObject.mutations);
+		}
+		
+		if("actions" in moduleObject) {
+			readOnlyModules.actions = Object.keys(moduleObject.actions);
+		}
+		*/
+		let NS = namespace;
+		
+		if(moduleName === "root") {
+			NS = "";
+		}
+		else if(moduleObject.namespaced === true) {
+			NS = namespace + "/" + moduleName;
+		}
+		
+		if(NS[0] === "/") {
+			NS = NS.substring(1, NS.length);
+		}	
+
+		//callback(readOnlyModules, namespace, {isDynamic});
+		callback(moduleObject, NS);	
+		
+		recur(moduleChildren, callback, NS);
+		
+		//#todo iterates over root prototype methods, cannot use hasOwnProperty because _children dont have it wtf???
+		if(moduleName === "root") {
+			break;
+		}
+	}
+}
+
+function checkIsUserStoreObject(obj={}) {
+	if("state" in obj || "getters" in obj || "mutations" in obj || "actions" in obj) {
+		return true;
+	}
+	
+	return false;
+}
+
+function checkIsVuexInstance(obj={}) {
+	["state", "getters", "commit", "dispatch"].forEach((required)=>{
+		if(!(required in obj)) {
+			return false;
+		}
+	});
+	
+	if(!("_modules" in obj) &amp;&amp; !("root" in obj._modules) &amp;&amp; !("_children" in obj._modules.root)) {
+		throw new Error("The Vuex instance provided has an incorrect interface to read store modules from. ");
+	}
+	return true;
+}
+
+function getStoreObject(rawObject) {
+	if(checkIsVuexInstance(rawObject)) {
+		return rawObject._modules.root._children;
+	}
+	
+	else if(checkIsUserStoreObject(rawObject)) {
+		return rawObject
+	}
+	
+	throw new Error("The store visitor received an unknown store object: provide a Vuex instance or the raw store object.");
+}
+
+/// Store visitor recurs over each of your Vuex modules (including root) and allows you to build queries such as "call each init action on every module".
+/// &lt;strong>Experimental&lt;/strong>: Currently, maybe too high level and exposes stuff which it probably should not. Treat callback params read-only, expect interface changes.
+/// @function storeVisitor
+/// @param {object} storeObj - The Vuex instance. Make sure to call storeVisitor after all dynamic modules have been registered.
+/// @param {function(object, string):undefined} callback - Callback(module, namespace) visiting each store module providing the current module and the namespace chain, if any.
+/// @returns {undefined}
+/// @example
+/// const store = new Vuex.Store();
+///	store.registerModule("storeVisitor", {actions: {
+///	   storeVisitor: function(storeParams, callback) {
+///     storeVisitor(store, callback);
+///    }			
+/// }});
+///
+/// //calls all init actions
+/// store.dispatch("storeVisitor", function callback(module, namespace) { 
+///   if("actions" in module &amp;&amp; "init" in module.actions) { store.dispatch(namespace+"/"+init); } 
+/// })
+export function storeVisitor(storeObj, callback) {
+	
+	if(typeof callback !== "function") {
+		throw new Error("The second parameter of the store visitor needs to be a function.");
+	}
+	
+	const store = storeObj;//getStoreObject(storeObj);
+	
+	
+	recur(store._modules, callback, "");
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#addArrayElementFactory">addArrayElementFactory</a></li><li><a href="global.html#crudContainerFactory">crudContainerFactory</a></li><li><a href="global.html#getArrayElWIdxByIdFactory">getArrayElWIdxByIdFactory</a></li><li><a href="global.html#passThruActionsFactory">passThruActionsFactory</a></li><li><a href="global.html#removeArrayElementByIdFactory">removeArrayElementByIdFactory</a></li><li><a href="global.html#resetArrayFactory">resetArrayFactory</a></li><li><a href="global.html#setArrayElPropsByIdFactory">setArrayElPropsByIdFactory</a></li><li><a href="global.html#setProps">setProps</a></li><li><a href="global.html#setPropsHandleObject">setPropsHandleObject</a></li><li><a href="global.html#setPropsOnObjectFactory">setPropsOnObjectFactory</a></li><li><a href="global.html#setPropVal">setPropVal</a></li><li><a href="global.html#storeVisitor">storeVisitor</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.2</a> on Thu Dec 12 2019 11:34:42 GMT+0100 (GMT+01:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

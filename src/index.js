@@ -15,16 +15,19 @@ import * as _mutations from "./mutations.js";
 import * as _actions from "./actions.js";
 
 import _crudContainer from "./store.crudContainerFactory.js";
+import {storeVisitor as _storeVisitor} from "./actions.visitor.js";
 
 export const getters = _getters;
 export const mutations = _mutations;
 export const actions = _actions;
 
+actions.storeVisitor = _storeVisitor;
+
 export const crudContainer = _crudContainer;
 
 export const {getArrayElWIdxByIdFactory} = _getters;
 export const {setPropVal, setProps, setArrayElPropsByIdFactory, setPropsOnObjectFactory, addArrayElementFactory, removeArrayElementByIdFactory, resetArrayFactory} = _mutations;
-export const {passThruActionsFactory} = actions;
+export const {passThruActionsFactory, storeVisitor} = actions;
 
 export const vuexHeman = {
 	getters, 

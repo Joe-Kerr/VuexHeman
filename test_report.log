@@ -11,6 +11,11 @@ Unit test report
     √ passThruActionsFactory throws if parameter not string, array or object
     √ passThruActionsFactory throws if element of array not of type string
 
+  actions.visitor.js
+    √ Vuex has the required interface
+    √ storeVisitor calls callback with namespace and current module
+    √ storeVisitor builds correct namespaces
+
   common.js
     √ helper.verifyIndexAndContainer throws if index is not an object in state
     √ helper.verifyIndexAndContainer throws if container is not an array in state
@@ -102,6 +107,6 @@ Unit test report
     √ resetArray calls verification helper
 
 
-  83 passing 
+  86 passing 
 
  MOCHA  Tests completed successfully

@@ -776,6 +776,119 @@ function crudContainerFactory() {
 
   return store;
 }
+// CONCATENATED MODULE: ./projects/common/vuexHeman/src/actions.visitor.js
+function recur(modules, callback, namespace) {
+  for (var moduleName in modules) {
+    if (moduleName === "storeVisitor") {
+      continue;
+    }
+
+    var moduleMeta = modules[moduleName];
+    var moduleObject = moduleMeta._rawModule || {};
+    var moduleChildren = moduleMeta._children; //const isDynamic = moduleMeta.runtime;
+
+    /*
+    const readOnlyModules = {
+    	namespaced: moduleObject.namespaced 
+    };
+    
+    if("getters" in moduleObject) {
+    	readOnlyModules.getters = Object.keys(moduleObject.getters);
+    }	
+    
+    if("mutations" in moduleObject) {
+    	readOnlyModules.mutations = Object.keys(moduleObject.mutations);
+    }
+    
+    if("actions" in moduleObject) {
+    	readOnlyModules.actions = Object.keys(moduleObject.actions);
+    }
+    */
+
+    var NS = namespace;
+
+    if (moduleName === "root") {
+      NS = "";
+    } else if (moduleObject.namespaced === true) {
+      NS = namespace + "/" + moduleName;
+    }
+
+    if (NS[0] === "/") {
+      NS = NS.substring(1, NS.length);
+    } //callback(readOnlyModules, namespace, {isDynamic});
+
+
+    callback(moduleObject, NS);
+    recur(moduleChildren, callback, NS); //#todo iterates over root prototype methods, cannot use hasOwnProperty because _children dont have it wtf???
+
+    if (moduleName === "root") {
+      break;
+    }
+  }
+}
+
+function checkIsUserStoreObject() {
+  var obj = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+  if ("state" in obj || "getters" in obj || "mutations" in obj || "actions" in obj) {
+    return true;
+  }
+
+  return false;
+}
+
+function checkIsVuexInstance() {
+  var obj = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  ["state", "getters", "commit", "dispatch"].forEach(function (required) {
+    if (!(required in obj)) {
+      return false;
+    }
+  });
+
+  if (!("_modules" in obj) && !("root" in obj._modules) && !("_children" in obj._modules.root)) {
+    throw new Error("The Vuex instance provided has an incorrect interface to read store modules from. ");
+  }
+
+  return true;
+}
+
+function getStoreObject(rawObject) {
+  if (checkIsVuexInstance(rawObject)) {
+    return rawObject._modules.root._children;
+  } else if (checkIsUserStoreObject(rawObject)) {
+    return rawObject;
+  }
+
+  throw new Error("The store visitor received an unknown store object: provide a Vuex instance or the raw store object.");
+} /// Store visitor recurs over each of your Vuex modules (including root) and allows you to build queries such as "call each init action on every module".
+/// <strong>Experimental</strong>: Currently, maybe too high level and exposes stuff which it probably should not. Treat callback params read-only, expect interface changes.
+/// @function storeVisitor
+/// @param {object} storeObj - The Vuex instance. Make sure to call storeVisitor after all dynamic modules have been registered.
+/// @param {function(object, string):undefined} callback - Callback(module, namespace) visiting each store module providing the current module and the namespace chain, if any.
+/// @returns {undefined}
+/// @example
+/// const store = new Vuex.Store();
+///	store.registerModule("storeVisitor", {actions: {
+///	   storeVisitor: function(storeParams, callback) {
+///     storeVisitor(store, callback);
+///    }			
+/// }});
+///
+/// //calls all init actions
+/// store.dispatch("storeVisitor", function callback(module, namespace) { 
+///   if("actions" in module && "init" in module.actions) { store.dispatch(namespace+"/"+init); } 
+/// })
+
+
+function storeVisitor(storeObj, callback) {
+  if (typeof callback !== "function") {
+    throw new Error("The second parameter of the store visitor needs to be a function.");
+  }
+
+  var store = storeObj; //getStoreObject(storeObj);
+
+  recur(store._modules, callback, "");
+}
 // CONCATENATED MODULE: ./projects/common/vuexHeman/src/index.js
 /** 
 * @file
@@ -791,9 +904,11 @@ import {vuexHeman} from "vuex-heman";
 
 
 
+
 var getters = getters_namespaceObject;
 var mutations = mutations_namespaceObject;
 var actions = actions_namespaceObject;
+actions.storeVisitor = storeVisitor;
 var crudContainer = crudContainerFactory;
 var src_getArrayElWIdxByIdFactory = getArrayElWIdxByIdFactory;
 
@@ -805,7 +920,8 @@ var src_setPropVal = setPropVal,
     src_removeArrayElementByIdFactory = removeArrayElementByIdFactory,
     src_resetArrayFactory = resetArrayFactory;
 
-var src_passThruActionsFactory = actions.passThruActionsFactory;
+var src_passThruActionsFactory = actions.passThruActionsFactory,
+    src_storeVisitor = actions.storeVisitor;
 
 var vuexHeman = {
   getters: getters,
@@ -828,6 +944,7 @@ var vuexHeman = {
 /* concated harmony reexport removeArrayElementByIdFactory */__webpack_require__.d(__webpack_exports__, "removeArrayElementByIdFactory", function() { return src_removeArrayElementByIdFactory; });
 /* concated harmony reexport resetArrayFactory */__webpack_require__.d(__webpack_exports__, "resetArrayFactory", function() { return src_resetArrayFactory; });
 /* concated harmony reexport passThruActionsFactory */__webpack_require__.d(__webpack_exports__, "passThruActionsFactory", function() { return src_passThruActionsFactory; });
+/* concated harmony reexport storeVisitor */__webpack_require__.d(__webpack_exports__, "storeVisitor", function() { return src_storeVisitor; });
 /* concated harmony reexport vuexHeman */__webpack_require__.d(__webpack_exports__, "vuexHeman", function() { return vuexHeman; });
 
 

@@ -27,4 +27,5 @@ test("expected individual exports provided", ()=>{
 	assertExports(actions, index);
 	
 	assert.ok("crudContainer" in index);
+	assert.ok("storeVisitor" in index);
 });
